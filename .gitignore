@@ -128,5 +128,21 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Visual Studio files
+#NuGet package folder
+**/packages/*
+# Visual Studio cache/options directory
 .vs/
+
+_ReSharper*
+[Bb]in
+obj
+objd
+out/
+tmp/
+App_Data
+*.user
+*.sln.cache
+*.userosscache
+*.suo
+TestResults
+launchSettings.json
