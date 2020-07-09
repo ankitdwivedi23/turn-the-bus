@@ -129,8 +129,8 @@ dmypy.json
 .pyre/
 
 # VS files, Nuget packages, binary files
-.vs/
-.bin/
-.obj/
-.objd/
-.packages/
+vs/
+bin/
+obj/
+objd/
+packages/
