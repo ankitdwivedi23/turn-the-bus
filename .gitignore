@@ -128,5 +128,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Visual Studio files
+# VS files, Nuget packages, binary files
 .vs/
+.bin/
+.obj/
+.objd/
+.packages/
