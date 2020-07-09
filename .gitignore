@@ -146,3 +146,4 @@ App_Data
 *.suo
 TestResults
 launchSettings.json
+Audio/
