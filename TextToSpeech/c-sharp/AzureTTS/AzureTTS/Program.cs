@@ -1,19 +1,22 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.CognitiveServices.Speech;
+﻿using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
-using NAudio.Lame;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace AzureTTS
 {
     class Program
     {
+        private static Dictionary<string, List<string>> chapterAudioFiles = new Dictionary<string, List<string>>();
+
         public static async Task SynthesisToAudioFileAsync(string ssmlFile, string outputAudioFile, string subscriptionKey, string region)
         {
+            Console.WriteLine($"Processing [{Path.GetFullPath(ssmlFile)}]");
+
             // Replace with your own subscription key and region identifier from here: https://aka.ms/speech/sdkregion
             // The default language is "en-us".
             var config = SpeechConfig.FromSubscription(subscriptionKey, region);
@@ -51,24 +54,45 @@ namespace AzureTTS
             }            
         }       
 
-        static void ConcatAudio(string audioFile1, string audioFile2, string outputAudioFile)
+        static void ConcatAudio(List<string> audioFiles, string outputAudioFile)
         {
-            using (var reader1 = new AudioFileReader(audioFile1))
-            using (var reader2 = new AudioFileReader(audioFile2))
+            List<AudioFileReader> audioFileReaders = new List<AudioFileReader>();
+            audioFiles.ForEach(f => audioFileReaders.Add(new AudioFileReader(f)));
+            var mixer = new ConcatenatingSampleProvider(audioFileReaders);
+            var outputDirectory = Path.GetDirectoryName(outputAudioFile);
+            if (!Directory.Exists(outputDirectory))
             {
-                var mixer = new ConcatenatingSampleProvider(new[] { reader1, reader2 });
-                WaveFileWriter.CreateWaveFile16("mixed.wav", mixer);
+                Directory.CreateDirectory(outputDirectory);
             }
+            WaveFileWriter.CreateWaveFile16(outputAudioFile, mixer);
+            audioFileReaders.ForEach(r => r.Close());
         }
 
         static void Main(string[] args)
         {
             string subscriptionKey = args[0];
             string region = args[1];
-            string outputAudioFile = "../../../Audio/hi-IN-Kalpana.wav";
-            string ssmlFile = "../../../Text/Digant-Text.xml";
 
-            SynthesisToAudioFileAsync(ssmlFile, outputAudioFile, subscriptionKey, region).Wait();
+            foreach (var ssmlFile in Directory.GetFiles("../../../Digant/", "*.xml"))
+            {
+                string filename = Path.GetFileNameWithoutExtension(ssmlFile);
+                string[] filenameParts = filename.Split('_');
+                string chapterKey = string.Concat(filenameParts[0], "_", filenameParts[1]);
+                if (!chapterAudioFiles.ContainsKey(chapterKey))
+                {
+                    chapterAudioFiles[chapterKey] = new List<string>();
+                }
+
+                string outputAudioFile = Path.Combine("../../../Audio/", string.Concat(filename, ".wav"));
+                chapterAudioFiles[chapterKey].Add(outputAudioFile);
+                SynthesisToAudioFileAsync(ssmlFile, outputAudioFile, subscriptionKey, region).Wait();
+            }
+
+            foreach (var chapterKey in chapterAudioFiles.Keys)
+            {
+                Console.WriteLine($"Concatenating audio files for {chapterKey}");
+                ConcatAudio(chapterAudioFiles[chapterKey], Path.Combine("../../../Audio/Final", string.Concat(chapterKey, ".wav")));
+            }
         }
     }
 }
