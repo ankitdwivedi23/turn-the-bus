@@ -69,7 +69,7 @@ namespace AzureTTS
 
         static void Main(string[] args)
         {
-            /*string subscriptionKey = args[0];
+            string subscriptionKey = args[0];
             string region = args[1];
 
             foreach (var ssmlFile in Directory.GetFiles("../../../Digant/", "*.xml"))
@@ -91,17 +91,7 @@ namespace AzureTTS
             {
                 Console.WriteLine($"Concatenating audio files for {chapterKey}");
                 ConcatAudio(chapterAudioFiles[chapterKey], Path.Combine("../../../Audio/Final", string.Concat(chapterKey, ".wav")));
-            }*/
-
-            string batchFileContent = string.Empty;
-            string cmdTemplate = "ffmpeg -loop 1 -i ./Digant/Digant_Cover.jpg -i ./Audio/Final/{0}.wav -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -vf \"pad = ceil(iw / 2) * 2:ceil(ih / 2) * 2\" -shortest {0}.mp4";
-            foreach (var file in Directory.GetFiles("../../../Audio/Final", "*.wav"))
-            {
-                string filename = Path.GetFileNameWithoutExtension(file);
-                batchFileContent = string.Concat(batchFileContent, string.Format(cmdTemplate, filename), Environment.NewLine);
             }
-
-            File.WriteAllText("../../../wav2Mp4.sh", batchFileContent);
         }
     }
 }
