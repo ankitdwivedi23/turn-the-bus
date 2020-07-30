@@ -1,3 +1,5 @@
+# -*- coding: UTF-8 -*-
+
 def create_ssml(s, filename):
     
     words = s.split(' ')
@@ -29,7 +31,10 @@ def create_ssml(s, filename):
                     sentences.append(' '.join(sentence))
                     sentence = []
                 k+=1
-
+            
+            if (len(sentence) > 0):
+                sentences.append(' '.join(sentence))
+            
             text = ' '.join(sentences)
             final = '<speak version="1.0" xmlns="https://www.w3.org/2001/10/synthesis" xml:lang="en-US">  <voice name="hi-IN-Kalpana">' + text + '  </voice></speak>'
             output_f = open(f'Digant/{filename}_part{j+1}.xml', 'w', encoding='utf-8')
