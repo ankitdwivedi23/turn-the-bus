@@ -65,6 +65,7 @@ namespace AzureTTS
                 Directory.CreateDirectory(outputDirectory);
             }
             WaveFileWriter.CreateWaveFile16(outputAudioFile, mixer);
+            audioFileReaders.ForEach(r => r.Close());
         }
 
         static void Main(string[] args)
